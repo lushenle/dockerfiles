@@ -1,0 +1,46 @@
+---
+version: '3.1'
+services:
+  postgres:
+    image: postgres:13.2-alpine
+    container_name: redmine_db
+    restart: always
+    networks:
+      - redmine
+    command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - ${PWD}/data/postgresql:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_DB=redmine'
+      - 'TZ=Asia/SHanghai'
+
+  redmine:
+    image: redmine:latest
+    container_name: redmine
+    restart: always
+    networks:
+      - redmine
+    volumes:
+      - ${PWD}/data/redmine/files:/usr/src/redmine/files
+      - ${PWD}/data/redmine/plugins:/usr/src/redmine/plugins
+      - ${PWD}/data/redmine/logs:/usr/src/redmine/log
+      - ${PWD}/data/redmine/themes:/usr/src/redmine/public/themes
+      #- ${PWD}/data/redmine/config:/usr/src/redmine/config
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3000/tcp"
+    ports:
+      - 3080:3000/tcp
+    environment:
+      - 'REDMINE_DB_POSTGRES=postgres'
+      - 'REDMINE_DB_DATABASE=redmine'
+      - 'REDMINE_DB_PASSWORD=password'
+      - 'TZ=Asia/SHanghai'
+    #entrypoint: /bin/bash
+    #command: -c "tail -f /etc/hosts"
+    #tty: true
+networks:
+  redmine:
+    driver: bridge
