@@ -1,0 +1,32 @@
+---
+version: '3.6'
+services:
+  wg-mon-rust:
+    image: harbor.internal.moqi.ai/itimages/wireguard_exporter:rust
+    container_name: wg_exporter-rust
+    restart: always
+    volumes:
+      - /etc/wireguard:/etc/wireguard:ro
+      - /etc/localtime:/etc/localtime:ro
+    command: ["/usr/local/bin/prometheus_wireguard_exporter", "-n", "/etc/wireguard/wg0.conf", "-r"]
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+
+  wg-mon-go:
+    image: harbor.internal.moqi.ai/itimages/wireguard_exporter:go
+    container_name: wg_exporter-go
+    restart: always
+    volumes:
+      - ${PWD}/wg-mon-go:/etc/wireguard:ro
+      - /etc/localtime:/etc/localtime:ro
+    command: ["/wireguard_exporter", "-wireguard.peer-file", "/etc/wireguard/wg0.toml", "-metrics.addr", ":9587"]
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9587/metrics"]
+      interval: 1s
+      timeout: 1s
+      retries: 3
+

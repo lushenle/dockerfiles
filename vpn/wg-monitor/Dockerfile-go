@@ -1,0 +1,15 @@
+FROM harbor.internal.moqi.ai/itimages/golang:v1.16.2 AS build
+
+WORKDIR /src
+RUN git clone https://github.com/mdlayher/wireguard_exporter \
+    && cd wireguard_exporter/cmd/wireguard_exporter/ \
+    && go build .
+
+FROM busybox:glibc
+LABEL description="prometheus exporter for wireguard." \
+    maintainer="Shenle Lu <lushenle@gmail.com>"
+COPY --from=build /src/wireguard_exporter/cmd/wireguard_exporter/wireguard_exporter .
+HEALTHCHECK --interval=2s --timeout=2s \
+    CMD wget -q -O - http://localhost:9586/metrics || exit 1
+CMD ["./wireguard_exporter"]
+

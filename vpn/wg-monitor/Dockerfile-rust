@@ -1,0 +1,21 @@
+FROM harbor.internal.moqi.ai/itimages/rust:latest as builder
+WORKDIR /usr/src/
+RUN git clone https://github.com/MindFlavor/prometheus_wireguard_exporter.git \
+    && cd prometheus_wireguard_exporter \
+    && cargo install --path .
+
+FROM debian:buster-slim
+LABEL maintainer="Shenle Lu <lushenle@gmail.com>" \
+    description="Docker container for building prometheus exporter for wireguard."
+
+RUN sh -c "echo 'deb http://deb.debian.org/debian buster-backports main contrib non-free' > /etc/apt/sources.list.d/buster-backports.list" \
+    && apt update \
+    && apt install -y wireguard wget --no-install-recommends \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/cargo/bin/prometheus_wireguard_exporter /usr/local/bin/prometheus_wireguard_exporter
+HEALTHCHECK --interval=3s --timeout=1s \
+    CMD wget -q -O - http://localhost:9586/metrics || exit 1
+CMD ["prometheus_wireguard_exporter"]
+

@@ -1,0 +1,35 @@
+---
+version: '3.6'
+services:
+  wg-gen-web:
+    image: wg/wg-gen-web:latest
+    container_name: wg-gen-web
+    restart: always
+    expose:
+      - "8080/tcp"
+    ports:
+      - 8082:8080
+    environment:
+      - WG_CONF_DIR=/data
+      - WG_INTERFACE_NAME=wg0.conf
+      - WG_STATS_API=http://172.17.0.1:8182
+      - SMTP_HOST=smtp.mailgun.org
+      - SMTP_PORT=25
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - SMTP_FROM=Wg Gen Web <admin@moqi.ai>
+      - OAUTH2_PROVIDER_NAME=oauth2oidc
+      - OAUTH2_PROVIDER=
+      - OAUTH2_CLIENT_ID=
+      - OAUTH2_CLIENT_SECRET=
+      - OAUTH2_REDIRECT_URL=
+    volumes:
+      - /etc/wireguard:/data
+  wg-json-api:
+    image: wg/wg-api:latest
+    container_name: wg-json-api
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+    command: wg-api --device wg0 --listen 172.17.0.1:8182

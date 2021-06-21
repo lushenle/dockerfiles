@@ -1,0 +1,30 @@
+---
+version: "3.3"
+services:
+  subspace:
+   image: harbor.internal.moqi.ai/subspacecommunity/subspace:master-016009f
+   container_name: subspace
+   volumes:
+    - ${HOME}/workspace/subspace/data:/data
+    - /etc/localtime:/etc/localtime:ro
+   restart: always
+   environment:
+    - SUBSPACE_HTTP_HOST=subspace.moqi.com.cn
+    - SUBSPACE_ENDPOINT_HOST=subspace.moqi.com.cn
+    - SUBSPACE_LETSENCRYPT=false
+    - SUBSPACE_HTTP_INSECURE=true
+    - SUBSPACE_THEME=pink
+    - SUBSPACE_HTTP_ADDR=":80"
+    - SUBSPACE_NAMESERVERS=10.1.1.84,8.8.8.8
+    - SUBSPACE_LISTENPORT=51820
+    - SUBSPACE_IPV4_PREF=10.1.3.
+    - SUBSPACE_IPV4_POOL=10.1.3.1/24
+    - SUBSPACE_IPV6_POOL=fd00::10:3:0/64
+    - SUBSPACE_IPV4_GW=10.1.3.1
+    - SUBSPACE_IPV6_GW=fd00::10:3:1
+    - SUBSPACE_IPV6_NAT_ENABLED=false
+    - SUBSPACE_ALLOWED_IPS=10.1.0.0/16
+    - TZ="Asia/Shanghai"
+   cap_add:
+    - NET_ADMIN
+   network_mode: "host"
