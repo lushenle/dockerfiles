@@ -1,0 +1,31 @@
+(common) {
+    log
+    errors
+    cache
+    loop
+}
+
+moqi.ai {
+    import common
+    hosts idocker.io {
+        fallthrough
+    }
+
+    template IN A {
+        match .*[.]dev1[.]internal[.]idocker[.]io
+        answer "{{ .Name }} 60 IN A 2.3.4.5"
+        fallthrough
+    }
+
+    forward . 208.67.222.222 208.67.220.220
+}
+
+. {
+    import common
+    hosts neoHosts {
+        fallthrough
+    }
+    forward . 114.114.114.114 119.29.29.29 {
+        health_check 5s
+    }
+}
