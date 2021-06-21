@@ -1,0 +1,12 @@
+{
+    "lag": 30,
+    "interval": 60,
+    "urls_file": "urls",
+    "smtp_username": "postmaster@mg.moqi.ai",
+    "smtp_password": "",
+    "smtp_host": "smtp.mailgun.org",
+    "smtp_port": "25",
+    "email_subject": "Web Application Monitor",
+    "from_email": "admin@moqi.ai",
+    "to_emails": ["xxx@moqi.ai", "xxx@moqi.ai"]
+}
