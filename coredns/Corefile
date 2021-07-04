@@ -5,7 +5,7 @@
     loop
 }
 
-moqi.ai {
+idocker.io {
     import common
     hosts idocker.io {
         fallthrough
