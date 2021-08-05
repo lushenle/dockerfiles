@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/olekukonko/tablewriter"
@@ -21,7 +20,7 @@ var merge *bool
 var limit *int
 
 func init() {
-	directory = flag.String("d", "", "fm-package directory")
+	directory = flag.String("d", "", "some directory")
 	file = flag.String("f", "", "single file")
 	merge = flag.Bool("merge", false, "merging all md5 values to one, folder type only")
 	limit = flag.Int("max", 0, "limit the max files to caclulate.")
@@ -63,29 +62,27 @@ func Md5SumFolder(folder string, limit int) (map[string][md5.Size]byte, error) {
 			if !info.Mode().IsRegular() {
 				return nil
 			}
-			if strings.HasSuffix(strings.ToLower(info.Name()), ".tar.gz") || strings.HasSuffix(strings.ToLower(info.Name()), ".jar") {
-				if limit != 0 {
-					//如果已经满了则阻塞在这里
-					limitChannel <- struct{}{}
-				}
-				wg.Add(1)
-				go func() {
-					data, err := ioutil.ReadFile(path)
-					select {
-					case c <- result{path: path, md5Sum: md5.Sum(data), err: err}:
-					case <-done:
-					}
-					if limit != 0 {
-						//读出数据，这样就有新的文件可以处理
-						<-limitChannel
-					}
-
-					wg.Done()
-				}()
+			if limit != 0 {
+				// blocking
+				limitChannel <- struct{}{}
 			}
+			wg.Add(1)
+			go func() {
+				data, err := ioutil.ReadFile(path)
+				select {
+				case c <- result{path: path, md5Sum: md5.Sum(data), err: err}:
+				case <-done:
+				}
+				if limit != 0 {
+					// read data
+					<-limitChannel
+				}
+
+				wg.Done()
+			}()
 			select {
 			case <-done:
-				return errors.New("Canceled")
+				return errors.New("canceled")
 			default:
 				return nil
 			}
@@ -161,4 +158,3 @@ func main() {
 		table.Render()
 	}
 }
-
