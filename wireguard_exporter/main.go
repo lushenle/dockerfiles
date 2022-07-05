@@ -82,8 +82,8 @@ func imagePush(dockerClient *client.Client) error {
 	defer cancel()
 
 	var authConfig = types.AuthConfig{
-		Username:      "manunkind",
-		Password:      "manunkind@123", //Docker Hub Password or Access Token
+		Username:      "xxxxxxx",
+		Password:      "xxxxxxx", //Docker Hub Password or Access Token
 		ServerAddress: "https://index.docker.io/v1/",
 	}
 
